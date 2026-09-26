@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cliply - AI-фабрика видео для маркетплейсов</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            background: #000;
+        }
+        .presentation { width: 100vw; height: 100vh; position: relative; }
+        .slide {
+            width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 60px;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .slide.active { opacity: 1; visibility: visible; }
+
+        /* Слайд 1: Титульный */
+        .slide-1 {
+            background: linear-gradient(135deg, #6D28D9 0%, #F97316 100%);
+            color: white;
+        }
+        .slide-1 h1 { font-size: 120px; font-weight: 900; margin-bottom: 20px; letter-spacing: -2px; }
+        .slide-1 .subtitle { font-size: 32px; margin-bottom: 40px; opacity: 0.95; }
+        .slide-1 .team { font-size: 20px; margin-bottom: 30px; opacity: 0.9; line-height: 1.6; }
+        .slide-1 .university {
+            font-size: 24px; font-weight: 600;
+            border-top: 2px solid white;
+            padding-top: 20px; margin-top: 40px;
+        }
+
+        /* Общие заголовки */
+        .slide h2 {
+            font-size: 48px; margin-bottom: 60px; font-weight: 800; color: #1a1a1a;
+        }
+        .slide-1 h2 { color: white; }
+
+        /* Слайд 2: Проблема */
+        .slide-2 { background: white; color: #1a1a1a; }
+        .problems-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 40px; max-width: 1200px;
+        }
+        .problem-item { display: flex; align-items: center; gap: 20px; font-size: 24px; }
+        .problem-icon { font-size: 48px; min-width: 60px; }
+        .problem-text { line-height: 1.4; }
+
+        /* Слайд 3: Анализ рынка */
+        .slide-3 { background: white; color: #1a1a1a; }
+        .market-stats { display: flex; gap: 60px; justify-content: center; }
+        .stat-box {
+            background: #1a1a1a; color: white;
+            padding: 50px 60px; border-radius: 20px;
+            text-align: center; min-width: 280px;
+        }
+        .stat-number { font-size: 56px; font-weight: 900; margin-bottom: 15px; }
+        .stat-label { font-size: 18px; opacity: 0.8; }
+
+        /* Слайд 4: Цель проекта */
+        .slide-4 { background: white; color: #1a1a1a; }
+        .goal-box {
+            background: #1a1a1a; color: white;
+            padding: 40px 80px; border-radius: 20px;
+            font-size: 42px; font-weight: 800; margin-bottom: 60px;
+        }
+        .tasks-list { max-width: 900px; font-size: 22px; line-height: 2; }
+        .tasks-list ol { padding-left: 30px; }
+
+        /* Слайд 5: Задачи исследования */
+        .slide-5 { background: white; color: #1a1a1a; }
+        .research-tasks { max-width: 1000px; font-size: 24px; line-height: 2.2; }
+        .research-tasks ol { padding-left: 40px; }
+
+        /* Слайд 6: Объект и предмет */
+        .slide-6 { background: white; color: #1a1a1a; }
+        .object-subject { display: flex; flex-direction: column; gap: 40px; }
+        .os-box {
+            background: #1a1a1a; color: white;
+            padding: 40px 100px; border-radius: 20px;
+            font-size: 36px; font-weight: 700; text-align: center;
+        }
+
+        /* Слайд 7: Методы исследования */
+        .slide-7 { background: white; color: #1a1a1a; }
+        .methods-list { max-width: 1000px; font-size: 24px; line-height: 2; }
+        .methods-list ul { list-style: none; padding: 0; }
+        .methods-list li { padding-left: 40px; position: relative; }
+        .methods-list li:before {
+            content: "•"; position: absolute; left: 0;
+            color: #6D28D9; font-weight: bold;
+        }
+
+        /* Слайд 8: TAM/SAM/SOM */
+        .slide-8 { background: white; color: #1a1a1a; }
+        .tam-sam-som { display: flex; gap: 60px; justify-content: center; }
+        .tss-box {
+            background: #1a1a1a; color: white;
+            padding: 50px 60px; border-radius: 20px;
+            text-align: center; min-width: 280px;
+        }
+        .tss-label { font-size: 32px; font-weight: 800; margin-bottom: 10px; }
+        .tss-value { font-size: 48px; font-weight: 900; margin-bottom: 15px; }
+        .tss-desc { font-size: 16px; opacity: 0.8; }
+
+        /* Слайд 9: Предлагаемое решение */
+        .slide-9 { background: white; color: #1a1a1a; }
+        .slide-9 .solution-title {
+            font-size: 28px; margin-bottom: 50px; color: #6D28D9;
+        }
+        .solution-steps {
+            display: flex; flex-direction: column; gap: 25px;
+            max-width: 900px; margin-bottom: 50px;
+        }
+        .step { display: flex; align-items: center; gap: 20px; font-size: 24px; }
+        .step-number {
+            background: #1a1a1a; color: white;
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 24px; flex-shrink: 0;
+        }
+        .price-box {
+            background: #F97316; color: white;
+            padding: 30px 60px; border-radius: 15px;
+            font-size: 28px; font-weight: 700;
+        }
+
+        /* Слайд 10: Бизнес-модель */
+        .slide-10 { background: white; color: #1a1a1a; }
+        .pricing { display: flex; gap: 40px; margin-bottom: 60px; }
+        .pricing-box {
+            background: #1a1a1a; color: white;
+            padding: 40px 50px; border-radius: 20px;
+            text-align: center; min-width: 250px;
+        }
+        .pricing-name { font-size: 28px; font-weight: 800; margin-bottom: 15px; }
+        .pricing-price { font-size: 32px; font-weight: 900; margin-bottom: 10px; }
+        .pricing-features { font-size: 20px; opacity: 0.9; }
+        .metrics { font-size: 24px; font-weight: 600; }
+
+        /* Слайд 11: План работ */
+        .slide-11 { background: white; color: #1a1a1a; }
+        .roadmap { display: flex; gap: 30px; }
+        .roadmap-box {
+            background: #1a1a1a; color: white;
+            padding: 40px 30px; border-radius: 20px;
+            text-align: center; min-width: 220px;
+        }
+        .roadmap-quarter { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+        .roadmap-stage { font-size: 20px; margin-bottom: 10px; opacity: 0.9; }
+        .roadmap-clients { font-size: 22px; font-weight: 700; }
+
+        /* Слайд 12: Ожидаемые результаты */
+        .slide-12 { background: white; color: #1a1a1a; }
+        .results-list {
+            max-width: 1000px;
+            font-size: 26px;
+            line-height: 2;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+        .results-list ul { list-style: none; padding: 0; }
+        .results-list li { padding-left: 40px; position: relative; }
+        .results-list li:before {
+            content: "•"; position: absolute; left: 0;
+            color: #1a1a1a; font-weight: bold;
+        }
+
+        /* Слайд 13: Роли в команде */
+        .slide-13 { background: white; color: #1a1a1a; }
+        .team-roles { max-width: 800px; font-size: 26px; line-height: 2; }
+        .team-roles p { margin-bottom: 15px; }
+        .team-name { font-weight: 700; }
+        .team-role { color: #6D28D9; font-weight: 600; }
+
+        /* Слайд 14: Финальный */
+        .slide-14 { background: white; color: #1a1a1a; }
+        .slide-14 h2 { font-size: 56px; margin-bottom: 60px; font-weight: 900; }
+        .final-content { display: flex; gap: 60px; align-items: center; }
+        .speaker-photo {
+            width: 300px; height: 300px;
+            background: #e5e7eb; border-radius: 20px;
+            overflow: hidden;
+        }
+        .speaker-photo img { width: 100%; height: 100%; object-fit: cover; }
+        .qr-codes { display: flex; gap: 40px; }
+        .qr-box { text-align: center; }
+        .qr-placeholder {
+            width: 200px; height: 200px;
+            background: white; border-radius: 15px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qr-placeholder img { width: 100%; height: 100%; object-fit: contain; }
+        .qr-label { font-size: 20px; font-weight: 600; }
+        .contact-info { margin-top: 60px; font-size: 24px; }
+        .contact-info strong { font-size: 28px; }
+
+        /* Навигация */
+        .navigation {
+            position: fixed; right: 40px; top: 50%;
+            transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 20px;
+            z-index: 1000;
+        }
+        .nav-btn {
+            width: 60px; height: 60px;
+            background: rgba(26, 26, 26, 0.9); color: white;
+            border: none; border-radius: 50%;
+            font-size: 24px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .nav-btn:hover { background: #6D28D9; transform: scale(1.1); }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .slide-counter {
+            position: fixed; bottom: 40px; right: 40px;
+            background: rgba(26, 26, 26, 0.9); color: white;
+            padding: 15px 25px; border-radius: 30px;
+            font-size: 18px; font-weight: 600; z-index: 1000;
+        }
+        .progress-bar {
+            position: fixed; top: 0; left: 0; height: 4px;
+            background: #6D28D9; transition: width 0.3s ease; z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="presentation">
+        <!-- Слайд 1: Титульный -->
+        <div class="slide slide-1 active">
+            <h1>Cliply.</h1>
+            <div class="subtitle">AI-фабрика видео для маркетплейсов</div>
+            <div class="team">
+                Команда:<br>
+                Дмитрий Культиков, Олег Трушников,<br>
+                Энже Ханова, Максим Говорухин, Луиза Головина
+            </div>
+            <div class="university">Тюменский индустриальный университет | 2026</div>
+        </div>
+
+        <!-- Слайд 2: Проблема -->
+        <div class="slide slide-2">
+            <h2>Актуальность проблемы</h2>
+            <div class="problems-grid">
+                <div class="problem-item">
+                    <div class="problem-icon"></div>
+                    <div class="problem-text">Маркетплейсы ранжируют товары с видео выше на первых позициях</div>
+                </div>
+                <div class="problem-item">
+                    <div class="problem-icon">👁️</div>
+                    <div class="problem-text">Без видео товар невидим клиентам</div>
+                </div>
+                <div class="problem-item">
+                    <div class="problem-icon">💰</div>
+                    <div class="problem-text">Создание одного видеоролика у блогера: <strong>10 тыс. руб., 2-3 нед</strong></div>
+                </div>
+                <div class="problem-item">
+                    <div class="problem-icon">🎯</div>
+                    <div class="problem-text">Селлеру нужно тестировать <strong>10-20 роликов в месяц</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 3: Анализ рынка -->
+        <div class="slide slide-3">
+            <h2>Анализ рынка</h2>
+            <div class="market-stats">
+                <div class="stat-box">
+                    <div class="stat-number">825 000</div>
+                    <div class="stat-label">селлеров на маркетплейсах РФ</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">15 000 ₽</div>
+                    <div class="stat-label">стоимость одного ролика</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">2-3 нед.</div>
+                    <div class="stat-label">сроки производства</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 4: Цель проекта -->
+        <div class="slide slide-4">
+            <h2>Цель проекта</h2>
+            <div class="goal-box">Фабричность производства</div>
+            <div class="tasks-list">
+                <strong>Задачи и результаты:</strong>
+                <ol>
+                    <li>Проанализировать рынок селлеров на маркетплейсах</li>
+                    <li>Оценка и сравнение технологий архитектуры для генерации видео</li>
+                    <li>Тестирование коммерческого решения</li>
+                    <li>Доведение прототипа до уровня MVP</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Слайд 5: Задачи исследования -->
+        <div class="slide slide-5">
+            <h2>Задачи исследования</h2>
+            <div class="research-tasks">
+                <ol>
+                    <li>Изучить актуальные потребности и болевые точки селлеров на маркетплейсах</li>
+                    <li>Ранжировать варианты архитектур для генерации видеоконтента</li>
+                    <li>Разработать прототип интерфейса интеграции с маркетплейсами</li>
+                    <li>Проведение тестирование производительности и качества работ прототипа</li>
+                    <li>Оценить экономический эффект от внедрения решения для селлеров</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Слайд 6: Объект и предмет -->
+        <div class="slide slide-6">
+            <h2>Объект и предмет исследования</h2>
+            <div class="object-subject">
+                <div class="os-box">рынок e-commerce</div>
+                <div class="os-box">потребности селлеров</div>
+            </div>
+        </div>
+
+        <!-- Слайд 7: Методы исследования -->
+        <div class="slide slide-7">
+            <h2>Методы исследования</h2>
+            <div class="methods-list">
+                <ul>
+                    <li>Анализ рынка потребностей селлеров</li>
+                    <li>Сравнительное сравнение требований конкуренций анализ</li>
+                    <li>Прототипирование моделирования с помощью ЛЛЛ (YandexGPT, OpenAI)</li>
+                    <li>AB-тестирование результатов</li>
+                    <li>Анкетирование юнит-экономики и бизнес-модели</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Слайд 8: TAM/SAM/SOM -->
+        <div class="slide slide-8">
+            <h2>Анализ рынка</h2>
+            <div class="tam-sam-som">
+                <div class="tss-box">
+                    <div class="tss-label">TAM</div>
+                    <div class="tss-value">80 млрд ₽</div>
+                    <div class="tss-desc">Контент рынок e-commerce РФ</div>
+                </div>
+                <div class="tss-box">
+                    <div class="tss-label">SAM</div>
+                    <div class="tss-value">12 млрд ₽</div>
+                    <div class="tss-desc">AI-видео для маркетплейсов</div>
+                </div>
+                <div class="tss-box">
+                    <div class="tss-label">SOM</div>
+                    <div class="tss-value">600 млн ₽</div>
+                    <div class="tss-desc">1% рынка за 3 года</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 9: Предлагаемое решение -->
+        <div class="slide slide-9">
+            <h2>Предлагаемое решение</h2>
+            <div class="solution-title">Cliply — веб-сервис для быстрого создания качественных видео</div>
+            <div class="solution-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div>Селлер загружает 3-5 фото товара</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div>AI анализирует нишу и предлагает стиль</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div>Генерирует 10 готовых видео за 2 минуты</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div>Селлер скачивает и публикует</div>
+                </div>
+            </div>
+            <div class="price-box">Стоимость: 190 руб. за видео (в 50 раз дешевле студии)</div>
+        </div>
+
+        <!-- Слайд 10: Бизнес-модель -->
+        <div class="slide slide-10">
+            <h2>Бизнес-модель</h2>
+            <div class="pricing">
+                <div class="pricing-box">
+                    <div class="pricing-name">Starter</div>
+                    <div class="pricing-price">2 990 ₽/мес</div>
+                    <div class="pricing-features">30 видео</div>
+                </div>
+                <div class="pricing-box">
+                    <div class="pricing-name">Pro</div>
+                    <div class="pricing-price">7 990 ₽/мес</div>
+                    <div class="pricing-features">100 видео + AI</div>
+                </div>
+                <div class="pricing-box">
+                    <div class="pricing-name">Agency</div>
+                    <div class="pricing-price">19 990 ₽/мес</div>
+                    <div class="pricing-features">Безлимит + API</div>
+                </div>
+            </div>
+            <div class="metrics">Средний чек: 5 500 руб/мес. | Маржинальность: 80%</div>
+        </div>
+
+        <!-- Слайд 11: План работ -->
+        <div class="slide slide-11">
+            <h2>План работ</h2>
+            <div class="roadmap">
+                <div class="roadmap-box">
+                    <div class="roadmap-quarter">Q4 2026</div>
+                    <div class="roadmap-stage">MVP</div>
+                    <div class="roadmap-clients">10 клиентов</div>
+                </div>
+                <div class="roadmap-box">
+                    <div class="roadmap-quarter">Q1 2027</div>
+                    <div class="roadmap-stage">Оптимизация</div>
+                    <div class="roadmap-clients">50 клиентов</div>
+                </div>
+                <div class="roadmap-box">
+                    <div class="roadmap-quarter">Q2 2027</div>
+                    <div class="roadmap-stage">Ozon, бнд</div>
+                    <div class="roadmap-clients">300 клиентов</div>
+                </div>
+                <div class="roadmap-box">
+                    <div class="roadmap-quarter">Q3 2027</div>
+                    <div class="roadmap-stage">Seed-раунд</div>
+                    <div class="roadmap-clients">1500 клиентов</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 12: Ожидаемые результаты -->
+        <div class="slide slide-12">
+            <h2>Ожидаемые результаты</h2>
+            <div class="results-list">
+                <ul>
+                    <li>Рабочий сервис для быстрого создания видео</li>
+                    <li>Снижение срока создания видео с 2 нед до 2 минут</li>
+                    <li>Повышение CTR карточек на +35%</li>
+                    <li>Выход на рынок маркетплейсов до 1.1 млн руб./мес (год 1)</li>
+                    <li>Публикация патента для научного руководства</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Слайд 13: Роли в команде -->
+        <div class="slide slide-13">
+            <h2>Роли в команде</h2>
+            <div class="team-roles">
+                <p><span class="team-name">Дмитрий Культиков</span> — <span class="team-role">CEO</span></p>
+                <p><span class="team-name">Олег Трушников</span> — <span class="team-role">CTO</span></p>
+                <p><span class="team-name">Энже Ханова</span> — <span class="team-role">COO</span></p>
+                <p><span class="team-name">Максим Говорухин</span> — <span class="team-role">Head of Growth</span></p>
+                <p><span class="team-name">Луиза Головина</span> — <span class="team-role">CPO</span></p>
+            </div>
+        </div>
+
+        <!-- Слайд 14: Финальный -->
+        <div class="slide slide-14">
+            <h2>Cliply - видео, которые продают.</h2>
+            <div class="final-content">
+                <div class="speaker-photo">
+                    <img src="photo.jpg" alt="Дмитрий Культиков">
+                </div>
+                <div class="qr-codes">
+                    <div class="qr-box">
+                        <div class="qr-placeholder">
+                            <img src="qr1.png" alt="QR ВКонтакте">
+                        </div>
+                        <div class="qr-label">ВКонтакте</div>
+                    </div>
+                    <div class="qr-box">
+                        <div class="qr-placeholder">
+                            <img src="qr2.png" alt="QR Telegram">
+                        </div>
+                        <div class="qr-label">Telegram</div>
+                    </div>
+                </div>
+            </div>
+            <div class="contact-info">
+                Руководитель проекта <strong>Дмитрий Культиков</strong><br>
+                Телефон для связи: <strong>+7 999 666 67 52</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Навигация -->
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">↑</button>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">↓</button>
+    </div>
+
+    <div class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">14</span>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                updateSlide();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                changeSlide(1);
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                changeSlide(-1);
+            }
+        });
+
+        updateSlide();
+    </script>
+</body>
+</html>
